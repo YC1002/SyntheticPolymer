@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="./icon.png">
+<title>合成高分子の悪魔</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#101418;
+    color:white;
+    font-family:"Yu Gothic",sans-serif;
+    overflow:hidden;
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+/* container を修正 */
+
+#container{
+
+    width:100vw;
+
+    /* height:100vh; を削除 */
+    min-height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    /* center固定を解除 */
+    justify-content:flex-start;
+
+    align-items:center;
+
+    text-align:center;
+
+    padding:40px 20px 120px 20px;
+
+    box-sizing:border-box;
+
+    cursor:pointer;
+}
+
+h1{
+    font-size:4rem;
+    margin-bottom:30px;
+}
+
+#detail{
+    display:none;
+    visibility:hidden;
+}
+
+#detail.show{
+    display:block;
+    visibility:visible;
+}
+
+@keyframes fade{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.section{
+    margin-top:30px;
+}
+
+.label{
+    font-size:1.7rem;
+    color:#66d9ff;
+    margin-bottom:15px;
+}
+
+.text{
+    font-size:1.3rem;
+    line-height:2rem;
+}
+
+svg{
+    width:min(95vw,1000px);
+    height:auto;
+
+    background:#1c232b;
+
+    border-radius:24px;
+
+    padding:20px;
+
+    box-sizing:border-box;
+
+    margin-top:10px;
+
+    /* ↓ 追加 */
+    /* overflow:visible; */
+}
+
+.benzene-line{
+    stroke:white;
+    stroke-width:4;
+    fill:none;
+}
+
+.double-line{
+    stroke:#66d9ff;
+    stroke-width:3;
+}
+
+.atom-text{
+    fill:white;
+    font-size:28px;
+    font-family:monospace;
+}
+
+.hint{
+    position:fixed;
+
+    bottom:15px;
+    left:0;
+    right:0;
+
+    text-align:center;
+
+    color:#888;
+
+    pointer-events:none;
+}
+
+</style>
+<!-- アラミド繊維 原料構造式 -->
+
+</head>
+
+<body>
+
+<div id="container">
+
+    <h1 id="polymerName"></h1>
+
+    <div id="detail">
+
+        <div class="section">
+            <div class="label">原料</div>
+            <div class="text" id="materials"></div>
+        </div>
+
+        <div class="section">
+            <div class="label">原料構造式</div>
+            <div id="materialSvg"></div>
+        </div>
+
+        <div class="section">
+            <div class="label">高分子構造式</div>
+            <div id="polymerSvg"></div>
+        </div>
+
+    </div>
+
+    <div class="hint">
+        タップ：表示 / 次へ
+    </div>
+
+</div>
+
+<script>
+
+const polymers = [
+
+{
+name:"ナイロン66",
+
+materials:"ヘキサメチレンジアミン + アジピン酸",
+
+materialSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="40" y="70">
+H₂N-(CH₂)₆-NH₂
+</text>
+
+<text class="atom-text" x="420" y="70">
++
+</text>
+
+<text class="atom-text" x="520" y="70">
+HOOC-(CH₂)₄-COOH
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="50" y="70">
+[-NH-(CH₂)₆-NH-CO-(CH₂)₄-CO-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"ナイロン6",
+
+materials:"ε-カプロラクタム",
+
+materialSvg:`
+<svg viewBox="0 0 1200 420">
+
+<!-- 環の結合 -->
+
+<line class="benzene-line" x1="360" y1="110" x2="500" y2="70"/>
+<line class="benzene-line" x1="500" y1="70" x2="650" y2="130"/>
+<line class="benzene-line" x1="650" y1="130" x2="690" y2="270"/>
+<line class="benzene-line" x1="690" y1="270" x2="560" y2="350"/>
+<line class="benzene-line" x1="560" y1="350" x2="400" y2="320"/>
+<line class="benzene-line" x1="400" y1="320" x2="320" y2="200"/>
+<line class="benzene-line" x1="320" y1="200" x2="360" y2="110"/>
+
+<!-- C=O -->
+
+<line class="benzene-line"
+x1="650" y1="130"
+x2="800" y2="80"/>
+
+<line class="double-line"
+x1="660" y1="150"
+x2="810" y2="100"/>
+
+<text class="atom-text"
+x="840" y="95">
+O
+</text>
+
+<!-- 原子 -->
+
+<text class="atom-text"
+x="300" y="105">
+CH₂
+</text>
+
+<text class="atom-text"
+x="500" y="55">
+CH₂
+</text>
+
+<text class="atom-text"
+x="675" y="135">
+C
+</text>
+
+<text class="atom-text"
+x="710" y="285">
+NH
+</text>
+
+<text class="atom-text"
+x="535" y="390">
+CH₂
+</text>
+
+<text class="atom-text"
+x="350" y="345">
+CH₂
+</text>
+
+<text class="atom-text"
+x="230" y="215">
+CH₂
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="180" y="70">
+[-NH-(CH₂)₅-CO-]n
+</text>
+
+</svg>
+`
+}
+,{
+name:"アラミド繊維",
+
+materials:"p-フェニレンジアミン + テレフタル酸ジクロリド",
+
+materialSvg:`
+<svg viewBox="0 0 900 240">
+
+    <!-- 左ベンゼン環 -->
+    <polygon class="benzene-line"
+        points="250,60 320,100 320,180 250,220 180,180 180,100"/>
+
+    <!-- 二重結合 -->
+    <line class="double-line" x1="200" y1="110" x2="250" y2="80"/>
+    <line class="double-line" x1="300" y1="110" x2="300" y2="170"/>
+    <line class="double-line" x1="250" y1="200" x2="200" y2="170"/>
+
+    <!-- 官能基 -->
+    <line class="benzene-line" x1="180" y1="140" x2="110" y2="140"/>
+    <line class="benzene-line" x1="320" y1="140" x2="390" y2="140"/>
+
+    <text class="atom-text" x="20" y="150">H₂N</text>
+    <text class="atom-text" x="405" y="150">NH₂</text>
+
+    <!-- ＋ -->
+    <text class="atom-text" x="470" y="150">+</text>
+
+    <!-- 右ベンゼン環 -->
+    <polygon class="benzene-line"
+        points="700,60 770,100 770,180 700,220 630,180 630,100"/>
+
+    <!-- 二重結合 -->
+    <line class="double-line" x1="650" y1="110" x2="700" y2="80"/>
+    <line class="double-line" x1="750" y1="110" x2="750" y2="170"/>
+    <line class="double-line" x1="700" y1="200" x2="650" y2="170"/>
+
+    <!-- 官能基 -->
+    <line class="benzene-line" x1="630" y1="140" x2="560" y2="140"/>
+    <line class="benzene-line" x1="770" y1="140" x2="840" y2="140"/>
+
+    <text class="atom-text" x="495" y="150">COlC</text>
+    <text class="atom-text" x="845" y="150">COCl</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1100 120">
+
+<text class="atom-text" x="40" y="70">
+[-NH-C₆H₄-NH-CO-C₆H₄-CO-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"PET",
+
+materials:"テレフタル酸 + エチレングリコール",
+
+materialSvg:`
+<svg viewBox="0 0 1100 240">
+
+<!-- ベンゼン環 -->
+<polygon class="benzene-line"
+points="350,60 420,100 420,180 350,220 280,180 280,100"/>
+
+<!-- 二重結合 -->
+<line class="double-line" x1="300" y1="110" x2="350" y2="80"/>
+<line class="double-line" x1="400" y1="110" x2="400" y2="170"/>
+<line class="double-line" x1="350" y1="200" x2="300" y2="170"/>
+
+<!-- 官能基 -->
+<line class="benzene-line" x1="280" y1="140" x2="190" y2="140"/>
+<line class="benzene-line" x1="420" y1="140" x2="510" y2="140"/>
+
+<text class="atom-text" x="40" y="150">HOOC</text>
+<text class="atom-text" x="525" y="150">COOH</text>
+
+<!-- + -->
+<text class="atom-text" x="620" y="150">+</text>
+
+<text class="atom-text" x="730" y="150">
+HO-CH₂-CH₂-OH
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1100 120">
+
+<text class="atom-text" x="30" y="70">
+[-O-CH₂-CH₂-O-CO-C₆H₄-CO-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"ビニロン",
+
+materials:"ポリビニルアルコール + ホルムアルデヒド",
+
+materialSvg:`
+<svg viewBox="0 0 1200 160">
+
+<text class="atom-text" x="40" y="90">
+[-CH₂-CH(OH)-]n
+</text>
+
+<text class="atom-text" x="500" y="90">
++
+</text>
+
+<text class="atom-text" x="620" y="90">
+HCHO
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1400 160">
+
+<text class="atom-text" x="30" y="90">
+[-CH₂-CH(-O-CH₂-O-)-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"PAN",
+
+materials:"アクリロニトリル",
+
+materialSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="280" y="70">
+CH₂=CH-CN
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="170" y="70">
+[-CH₂-CH(CN)-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"SBR",
+
+materials:"スチレン + ブタジエン",
+
+materialSvg:`
+<svg viewBox="0 0 1100 240">
+
+<!-- ベンゼン環 -->
+<polygon class="benzene-line"
+points="220,50 290,90 290,170 220,210 150,170 150,90"/>
+
+<!-- 二重結合 -->
+<line class="double-line" x1="170" y1="100" x2="220" y2="70"/>
+<line class="double-line" x1="270" y1="100" x2="270" y2="160"/>
+<line class="double-line" x1="220" y1="190" x2="170" y2="160"/>
+
+<!-- 結合 -->
+<line class="benzene-line" x1="290" y1="130" x2="390" y2="130"/>
+
+<text class="atom-text" x="410" y="140">
+CH=CH₂
+</text>
+
+<text class="atom-text" x="620" y="140">
++
+</text>
+
+<text class="atom-text" x="720" y="140">
+CH₂=CH-CH=CH₂
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="110" y="70">
+[-CH₂-CH(C₆H₅)-]m[-CH₂-CH=CH-CH₂-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"NBR",
+
+materials:"アクリロニトリル + ブタジエン",
+
+materialSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="70" y="70">
+CH₂=CH-CN
+</text>
+
+<text class="atom-text" x="380" y="70">
++
+</text>
+
+<text class="atom-text" x="500" y="70">
+CH₂=CH-CH=CH₂
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1000 120">
+
+<text class="atom-text" x="90" y="70">
+[-CH₂-CH(CN)-]m[-CH₂-CH=CH-CH₂-]n
+</text>
+
+</svg>
+`
+},
+
+{
+name:"フッ素ゴム",
+
+materials:"フッ化ビニリデン + ヘキサフルオロプロペン",
+
+materialSvg:`
+<svg viewBox="0 0 1400 160">
+
+<text class="atom-text" x="40" y="90">
+CH₂=CF₂
+</text>
+
+<text class="atom-text" x="380" y="90">
++
+</text>
+
+<text class="atom-text" x="500" y="90">
+CF₂=C(CF₃)F
+</text>
+
+</svg>
+`,
+
+polymerSvg:`
+<svg viewBox="0 0 1600 160">
+
+<text class="atom-text" x="30" y="90">
+[-CH₂-CF₂-]m[-CF₂-CF(CF₃)-]n
+</text>
+
+</svg>
+`
+}
+
+];
+
+let index = 0;
+let showing = false;
+
+function showQuestion(){
+
+    const p = polymers[index];
+
+    document.getElementById("polymerName").textContent
+    = p.name;
+
+    const detail = document.getElementById("detail");
+
+    detail.classList.remove("show");
+
+    document.getElementById("materialSvg").innerHTML = "";
+    document.getElementById("polymerSvg").innerHTML = "";
+
+    showing = false;
+}
+
+function showAnswer(){
+
+    const p = polymers[index];
+
+    document.getElementById("materials").textContent
+    = p.materials;
+
+    document.getElementById("materialSvg").innerHTML
+    = p.materialSvg;
+
+    document.getElementById("polymerSvg").innerHTML
+    = p.polymerSvg;
+
+    document.getElementById("detail")
+    .classList.add("show");
+
+    showing = true;
+}
+
+document.getElementById("container")
+.addEventListener("click",()=>{
+
+    if(!showing){
+
+        showAnswer();
+
+    }else{
+
+        index++;
+
+        if(index >= polymers.length){
+            index = 0;
+        }
+
+        showQuestion();
+    }
+
+});
+
+showQuestion();
+
+</script>
+
+</body>
+</html>
